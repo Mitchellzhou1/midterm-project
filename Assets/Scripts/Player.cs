@@ -5,7 +5,6 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
 
-    public static Player instance;
     public float speed = 6;
     public float jumpForce = 300;
 
@@ -14,36 +13,37 @@ public class Player : MonoBehaviour
     public Transform feet;
 
     private Rigidbody2D rb;
+    private Animator Animator;
 
-    private void Awake(){
-        instance = this;
-    }
+
 
     void Start(){
         rb = GetComponent<Rigidbody2D>();
+        Animator = GetComponent<Animator>();
     }
 
     void FixedUpdate() {
-    
+
         float xSpeed = Input.GetAxis("Horizontal") * speed;
         rb.velocity = new Vector2(xSpeed, rb.velocity.y);
       
+        float xScale = transform.localScale.x;
+        if ((xSpeed < 0 && xScale >0) || (xSpeed > 0 && xScale < 1)){
+            transform.localScale *= new Vector2(-1, 1);
+        }
+
+        Animator.SetFloat("Speed", Mathf.Abs(xSpeed));
 
     }
 
     void Update(){
-        if (Input.GetButtonDown("Jump")){
-            print("trying to jump");
-            print("ont the ground?" + isGrounded);
-            if (isGrounded){
+
+        isGrounded = Physics2D.OverlapCircle(feet.position, .25f, ground);
+        if (Input.GetButtonDown("Jump") && isGrounded){
                 rb.AddForce(new Vector2(0, jumpForce));
-                isGrounded = false;
-            }
+       
         }
     }
 
-    public void onFloor(){
-        isGrounded = true;
-        print(isGrounded);
-    }
+
 }
